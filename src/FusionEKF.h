@@ -45,7 +45,7 @@ private:
   float ro_dot_in;
 
   // previous timestamp
-  long previous_timestamp_;
+  long long previous_timestamp_;
 
   // tool object used to compute Jacobian and RMSE
   Tools tools;
