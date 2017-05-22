@@ -4,15 +4,21 @@
 #include <vector>
 #include <stdlib.h>
 #include "Eigen/Dense"
+
 #include "FusionEKF.h"
 #include "ground_truth_package.h"
 #include "measurement_package.h"
+#include "tools.h"
 
 using namespace std;
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using std::vector;
 
+/***** End of configuration *****/
+/********************************/
+
+/*** Main Program begins here ***/
 void check_arguments(int argc, char* argv[]) {
   string usage_instructions = "Usage instructions: ";
   usage_instructions += argv[0];
@@ -69,12 +75,11 @@ int main(int argc, char* argv[]) {
   // prep the measurement packages (each line represents a measurement at a
   // timestamp)
   while (getline(in_file_, line)) {
-
     string sensor_type;
     MeasurementPackage meas_package;
     GroundTruthPackage gt_package;
     istringstream iss(line);
-    long long timestamp;
+    long timestamp;
 
     // reads first element from the current line
     iss >> sensor_type;
@@ -82,7 +87,7 @@ int main(int argc, char* argv[]) {
       // LASER MEASUREMENT
 
       // read measurements at this timestamp
-      meas_package.sensor_type_ = MeasurementPackage::LASER;
+      meas_package.sensor_type_ = SensorType::LASER;
       meas_package.raw_measurements_ = VectorXd(2);
       float x;
       float y;
@@ -96,15 +101,15 @@ int main(int argc, char* argv[]) {
       // RADAR MEASUREMENT
 
       // read measurements at this timestamp
-      meas_package.sensor_type_ = MeasurementPackage::RADAR;
+      meas_package.sensor_type_ = SensorType::RADAR;
       meas_package.raw_measurements_ = VectorXd(3);
       float ro;
-      float phi;
+      float theta;
       float ro_dot;
       iss >> ro;
-      iss >> phi;
+      iss >> theta;
       iss >> ro_dot;
-      meas_package.raw_measurements_ << ro, phi, ro_dot;
+      meas_package.raw_measurements_ << ro, theta, ro_dot;
       iss >> timestamp;
       meas_package.timestamp_ = timestamp;
       measurement_pack_list.push_back(meas_package);
@@ -124,7 +129,7 @@ int main(int argc, char* argv[]) {
     gt_pack_list.push_back(gt_package);
   }
 
-  // Create a Fusion EKF instance
+  // Create a Fusion EKF instance and initialize it
   FusionEKF fusionEKF;
 
   // used to compute the RMSE later
@@ -145,11 +150,11 @@ int main(int argc, char* argv[]) {
     out_file_ << fusionEKF.ekf_.x_(3) << "\t";
 
     // output the measurements
-    if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::LASER) {
+    if (measurement_pack_list[k].sensor_type_ == SensorType::LASER) {
       // output the estimation
       out_file_ << measurement_pack_list[k].raw_measurements_(0) << "\t";
       out_file_ << measurement_pack_list[k].raw_measurements_(1) << "\t";
-    } else if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::RADAR) {
+    } else if (measurement_pack_list[k].sensor_type_ == SensorType::RADAR) {
       // output the estimation in the cartesian coordinates
       float ro = measurement_pack_list[k].raw_measurements_(0);
       float phi = measurement_pack_list[k].raw_measurements_(1);
@@ -166,10 +171,9 @@ int main(int argc, char* argv[]) {
     estimations.push_back(fusionEKF.ekf_.x_);
     ground_truth.push_back(gt_pack_list[k].gt_values_);
   }
-
   // compute the accuracy (RMSE)
   Tools tools;
-  cout << "Accuracy - RMSE:" << endl << tools.CalculateRMSE(estimations, ground_truth) << endl;
+  cout << "\nAccuracy - RMSE:" << endl << tools.CalculateRMSE(estimations, ground_truth) << endl;
 
   // close files
   if (out_file_.is_open()) {

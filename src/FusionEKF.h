@@ -1,13 +1,17 @@
 #ifndef FusionEKF_H_
 #define FusionEKF_H_
 
-#include "measurement_package.h"
-#include "Eigen/Dense"
 #include <vector>
 #include <string>
 #include <fstream>
+#include <unordered_map>
+#include <tuple>
+#include <memory>
+
+#include "measurement_package.h"
 #include "kalman_filter.h"
-#include "tools.h"
+
+typedef std::unordered_map<SensorType, SensorModel> SensorMap;
 
 class FusionEKF {
 public:
@@ -21,39 +25,45 @@ public:
   */
   virtual ~FusionEKF();
 
+  void Init(const MeasurementPackage& measurement);
   /**
   * Run the whole flow of the Kalman Filter from here.
   */
   void ProcessMeasurement(const MeasurementPackage &measurement_pack);
 
   /**
+   * Add sensor definition to FusionEKF
+   * @param type
+   * @param measCov
+   * @param measModel
+   * @param measJac
+   */
+  void AddSensor(SensorType type, const Eigen::MatrixXd& measCov, const SensorFunc& measModel, const SensorJacobianFunc& measJac = NULL);
+
+  /**
+   * Add linear model
+   * @param type
+   * @param measCov
+   * @param measMat
+   */
+  void AddLinearSensor(SensorType type, const Eigen::MatrixXd& measCov, const MatrixXd& measMat);
+  /**
   * Kalman Filter update and prediction math lives in here.
   */
   KalmanFilter ekf_;
 
-private:
   // check whether the tracking toolbox was initiallized or not (first measurement)
   bool is_initialized_;
-  
-  //acceleration noise components
-  float noise_ax;
-  float noise_ay;
-  
-  //measurements
-  float ro_in;
-  float phi_in;
-  float ro_dot_in;
 
+  static VectorXd RadarMeasurement(const VectorXd &x);
+
+private:
   // previous timestamp
   long long previous_timestamp_;
 
-  // tool object used to compute Jacobian and RMSE
-  Tools tools;
-  Eigen::MatrixXd R_laser_;
-  Eigen::MatrixXd R_radar_;
-  Eigen::MatrixXd H_laser_;
-  Eigen::MatrixXd Hj_;
-  
+  // Map containing sensor definitions
+  SensorMap sensors_;
+  VectorXd computeX(const MeasurementPackage &measurement);
 };
 
 #endif /* FusionEKF_H_ */
