@@ -11,7 +11,7 @@
 #include "measurement_package.h"
 #include "kalman_filter.h"
 
-typedef std::unordered_map<SensorType, SensorModel> SensorMap;
+typedef std::unordered_map<SensorType, SensorModel, EnumClassHash> SensorMap;
 
 class FusionEKF {
 public:

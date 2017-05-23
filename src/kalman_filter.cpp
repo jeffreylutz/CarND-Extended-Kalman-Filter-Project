@@ -1,5 +1,7 @@
 #include "kalman_filter.h"
 
+using namespace std;
+
 KalmanFilter::KalmanFilter() {}
 
 KalmanFilter::~KalmanFilter() {}
@@ -42,7 +44,6 @@ void KalmanFilter::UpdateEKF(const Eigen::VectorXd &z, const SensorModel &sensor
   } else {
     H = H_func(x_);
   }
-
   UpdateWithPrediction(z, z_pred, H, R);
 }
 

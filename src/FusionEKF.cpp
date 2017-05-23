@@ -86,7 +86,9 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     /*****************************************************************************
      *  Update
      ****************************************************************************/
-    ekf_.UpdateEKF(measurement_pack.raw_measurements_, sensors_[measurement_pack.sensor_type_]);
+    auto mt = measurement_pack.sensor_type_;
+    auto sm = sensors_[mt];
+    ekf_.UpdateEKF(measurement_pack.raw_measurements_, sm);
   }
   previous_timestamp_ = measurement_pack.timestamp_;
 
