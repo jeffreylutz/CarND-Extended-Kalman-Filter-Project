@@ -40,7 +40,7 @@ void KalmanFilter::UpdateEKF(const Eigen::VectorXd &z, const SensorModel &sensor
 
   z_pred = h_func(x_);
   if (H_func == NULL) {
-    H = Tools::CalculateJacobian(h_func, x_);
+    H = tools_.CalculateJacobian(x_);
   } else {
     H = H_func(x_);
   }

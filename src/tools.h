@@ -8,9 +8,6 @@ using Eigen::VectorXd;
 using namespace std;
 
 class Tools {
-private:
-
-//  VectorXd SensorFunc([H](const VectorXd& x));
 
 public:
 
@@ -22,30 +19,11 @@ public:
   /**
   * A helper method to calculate Jacobians.
   */
-//  Eigen::MatrixXd CalculateJacobian(const Eigen::VectorXd& x_state);
+  MatrixXd CalculateJacobian(const VectorXd& x_state);
 
-  /**
-  * A helper method to calculate RMSE.
-  */
-//  VectorXd CalculateRMSE(const vector<VectorXd> &estimations, const vector<VectorXd> &ground_truth);
+private:
+  const double MIN_DIVISOR = 0.001;
 
-  template<class Func> inline static MatrixXd CalculateJacobian(Func f, const VectorXd &x, const float h = 1e-4)
-  {
-    int m, n;
-    MatrixXd jac;
-
-    n = x.size();
-    MatrixXd I = MatrixXd::Identity(n, n)*h;
-    m = f(x).size();
-    jac = MatrixXd(m, n);
-
-    for(auto i=0; i<x.size(); i++)
-    {
-      auto step = I.col(i);
-      jac.col(i) = (f(x+step) - f(x-step))/(2*h);
-    }
-    return jac;
-  };
 };
 
 #endif /* TOOLS_H_ */

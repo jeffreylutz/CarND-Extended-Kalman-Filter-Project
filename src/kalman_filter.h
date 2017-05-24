@@ -96,6 +96,7 @@ private:
   DynamicModel getDynamicModel();
   ProcessNoiseFunction getProcessNoiseFunction();
   ModelFunction getModelFunction();
+  Tools tools_;
 
 };
 
