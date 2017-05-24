@@ -1,0 +1,6 @@
+#!/bin/bash
+
+clear
+rm -rf CMake* Makefile cmake_install.cmake
+cmake .. && make && ./ExtendedKF ../data/obj_pose-laser-radar-synthetic-input.txt output.txt
+

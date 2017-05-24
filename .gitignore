@@ -4,9 +4,6 @@
 # Jetbrains CLion
 .idea
 
-# build files
-build/
-
 cmake-build-debug/
 
 # editor config
